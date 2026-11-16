@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>aiofmcosta · Dashboard</title>
+<style>
+:root{--bg:#fff;--card:#f5f6f8;--text:#161a1f;--muted:#5d6672;--line:#dfe3e8;--up:#1a8a4f;--down:#c0392b;--warn:#b7791f;--accent:#2a6fdb;
+  --ig:#c13584;--tt:#0f9d9a;--yt:#e02424;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#14171b;--card:#1d2127;--text:#eceff3;--muted:#98a2ae;--line:#2d333b;--up:#4cc38a;--down:#ff7a6b;--warn:#f0b44c;--accent:#5b9bff;
+  --ig:#e45ba6;--tt:#2ec4c0;--yt:#ff5a5a}}
+*{box-sizing:border-box}html{background:var(--bg)}
+body{margin:0 auto;padding:16px;max-width:1400px;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{font-size:20px;margin:0}h2{font-size:16px;margin:28px 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted);font-size:13px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.who{display:flex;gap:10px;align-items:center}.who img{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--line)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input,button,.btn{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:14px;text-decoration:none;cursor:pointer}
+input{cursor:text}button:disabled{opacity:.5}
+.live{display:flex;align-items:center;gap:6px}.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:none}
+.live.on .dot{background:var(--up);animation:pulse 2s infinite}.live.late .dot{background:var(--warn)}.live.off .dot{background:var(--down)}
+@keyframes pulse{50%{opacity:.3}}
+#tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 16px;border-bottom:1px solid var(--line)}
+#tabs a{padding:8px 12px;text-decoration:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center}
+#tabs a.on{color:var(--text);border-bottom-color:var(--accent)}
+.pd{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}.pd.ig{background:var(--ig)}.pd.tt{background:var(--tt)}.pd.yt{background:var(--yt)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.card{background:var(--card);border-radius:12px;padding:14px;border-top:3px solid transparent}.card.ig{border-top-color:var(--ig)}.card.tt{border-top-color:var(--tt)}.card.yt{border-top-color:var(--yt)}
+.card h3{margin:0;font-size:14px;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:center}
+.card a.go{margin-left:auto;font-size:12px;font-weight:500}
+.big{font-size:28px;font-weight:650;margin:4px 0}.up{color:var(--up)}.down{color:var(--down)}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin:10px 0 6px;font-size:13px;color:var(--muted)}.mini b{color:var(--text)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:0 20px}
+.box{background:var(--card);border-radius:12px;padding:12px;height:300px;position:relative}
+.note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted);font-size:14px;pointer-events:none}
+.note:empty{display:none}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+th{color:var(--muted);font-weight:500}th[data-k]{cursor:pointer;user-select:none}th.sorted{color:var(--text)}
+td.cap{white-space:normal;min-width:200px;max-width:360px;font-size:13px}
+img.th{width:42px;height:42px;object-fit:cover;border-radius:6px;display:block;background:var(--line)}
+img.th.wide{width:64px;height:36px}
+table.heat{width:auto}.heat th{text-align:center}.heat td{text-align:center;min-width:66px;border:3px solid var(--bg);border-radius:8px;font-weight:600;font-size:13px;background:var(--card)}
+.heat small{display:block;font-weight:400;opacity:.75;font-size:11px}
+.alert{background:color-mix(in srgb,var(--warn) 12%,transparent);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14px}
+.alert.err{background:color-mix(in srgb,var(--down) 12%,transparent);border-color:color-mix(in srgb,var(--down) 40%,transparent)}
+.tag{display:inline-flex;gap:5px;align-items:center;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--line)}
+.tag.ok{background:color-mix(in srgb,var(--up) 20%,transparent);color:var(--up)}.tag.ko{background:color-mix(in srgb,var(--down) 20%,transparent);color:var(--down)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translate(-50%,20px);opacity:0;visibility:hidden;background:var(--text);color:var(--bg);padding:8px 16px;border-radius:20px;transition:all .3s;font-size:14px;z-index:9}
+#toast.show{transform:translate(-50%,0);opacity:1;visibility:visible}
+#gate{max-width:340px;margin:60px auto}#gate input{width:100%;margin:10px 0}
+.more{margin-top:10px}
+[hidden]{display:none!important}a{color:var(--accent)}
+</style></head><body>
+<header>
+  <div class="who"><img id="pic" alt="" hidden referrerpolicy="no-referrer"><div><h1>aiofmcosta</h1>
+    <div id="live" class="live muted"><span class="dot"></span><span id="upd">Caricamento…</span></div></div></div>
+  <div class="ctrl">
+    <select id="range" aria-label="Periodo"><option value="7">Ultimi 7 giorni</option><option value="30" selected>Ultimi 30 giorni</option><option value="90">Ultimi 90 giorni</option><option value="365">Ultimo anno</option><option value="0">Tutto</option></select>
+    <button id="reload" title="Controlla subito se ci sono dati nuovi">↻ Ricarica</button>
+    <a id="force" class="btn" target="_blank" rel="noopener" title="Apre GitHub: premi 'Run workflow' per raccogliere i dati adesso" hidden>Aggiorna ora</a>
+    <button id="logout" title="Dimentica la password su questo dispositivo" hidden>Esci</button>
+  </div>
+</header>
+<div id="gate" class="card" hidden><h3>Dashboard protetta</h3><input id="pw" type="password" placeholder="Password" autocomplete="current-password"><button id="go">Entra</button><div id="gmsg" class="muted"></div></div>
+<nav id="tabs" hidden><a href="#" data-t="ov">Panoramica</a><a href="#instagram" data-t="ig"><span class="pd ig"></span>Instagram</a><a href="#tiktok" data-t="tt"><span class="pd tt"></span>TikTok</a><a href="#youtube" data-t="yt"><span class="pd yt"></span>YouTube</a></nav>
+<div id="alerts"></div>
+
+<main id="ov" hidden>
+  <div class="kpi" id="ovKpi"></div>
+  <div class="grid2">
+    <section><h2>Crescita del pubblico nel periodo</h2><div class="box"><canvas id="cOvFol"></canvas><div class="note" id="nOvFol"></div></div></section>
+    <section><h2>Visualizzazioni al giorno</h2><div class="box"><canvas id="cOvViews"></canvas><div class="note" id="nOvViews"></div></div></section>
+  </div>
+  <section><h2>Contenuti migliori del periodo <span class="muted">tutte le piattaforme, ordinati per visualizzazioni</span></h2><div class="scroll"><table id="ovTop"></table></div></section>
+  <section><h2>Stato della raccolta</h2><div class="scroll"><table id="ovHealth"></table></div><div class="muted" id="ovNote" style="margin-top:8px"></div></section>
+</main>
+
+<main id="ig" hidden>
+  <div id="igMsg"></div>
+  <div id="igBody">
+    <div class="kpi" id="igKpi"></div>
+    <div class="grid2">
+      <section><h2>Follower</h2><div class="box"><canvas id="cIgFol"></canvas><div class="note" id="nIgFol"></div></div></section>
+      <section><h2>Insight giornalieri <select id="igMet" aria-label="Metrica"></select></h2><div class="box"><canvas id="cIgIns"></canvas><div class="note" id="nIgIns"></div></div></section>
+      <section><h2>Nuovi follower e unfollow</h2><div class="box"><canvas id="cIgFU"></canvas><div class="note" id="nIgFU"></div></div></section>
+      <section><h2>Rendimento medio per tipo di post</h2><div class="box"><canvas id="cIgType"></canvas><div class="note" id="nIgType"></div></div></section>
+    </div>
+    <section><h2>Orari migliori <span class="muted">visualizzazioni medie per post, ora italiana, su tutti i post</span></h2><div class="scroll" id="igHeat"></div></section>
+    <section><h2>Post del periodo <input id="igQ" type="search" placeholder="Cerca nella didascalia" aria-label="Cerca"><select id="igType" aria-label="Tipo"></select><button data-csv="ig">Esporta CSV</button></h2>
+      <div class="scroll"><table id="igTbl"></table></div><button class="more" data-more="ig" hidden></button></section>
+    <section><h2>Storie degli ultimi 7 giorni</h2><div class="scroll"><table id="igSto"></table></div></section>
+  </div>
+</main>
+
+<main id="tt" hidden>
+  <div id="ttMsg"></div>
+  <div id="ttBody">
+    <div class="kpi" id="ttKpi"></div>
+    <div class="grid2">
+      <section><h2>Follower</h2><div class="box"><canvas id="cTtFol"></canvas><div class="note" id="nTtFol"></div></div></section>
+      <section><h2>Crescita giornaliera <select id="ttMet" aria-label="Metrica"><option value="views">Visualizzazioni</option><option value="likes">Like</option><option value="comments">Commenti</option><option value="shares">Condivisioni</option></select></h2><div class="box"><canvas id="cTtGain"></canvas><div class="note" id="nTtGain"></div></div></section>
+      <section><h2>Nuovi follower al giorno</h2><div class="box"><canvas id="cTtNew"></canvas><div class="note" id="nTtNew"></div></div></section>
+      <section><h2>Video pubblicati per settimana</h2><div class="box"><canvas id="cTtWeek"></canvas><div class="note" id="nTtWeek"></div></div></section>
+    </div>
+    <section><h2>Orari migliori <span class="muted">visualizzazioni medie per video, ora italiana, su tutti i video</span></h2><div class="scroll" id="ttHeat"></div></section>
+    <section><h2>Video del periodo <input id="ttQ" type="search" placeholder="Cerca nel titolo" aria-label="Cerca"><button data-csv="tt">Esporta CSV</button></h2>
+      <div class="scroll"><table id="ttTbl"></table></div><button class="more" data-more="tt" hidden></button></section>
+  </div>
+</main>
+
+<main id="yt" hidden>
+  <div id="ytMsg"></div>
+  <div id="ytBody">
+    <div class="kpi" id="ytKpi"></div>
+    <div class="grid2">
+      <section><h2>Iscritti</h2><div class="box"><canvas id="cYtFol"></canvas><div class="note" id="nYtFol"></div></div></section>
+      <section><h2>Crescita giornaliera <select id="ytMet" aria-label="Metrica"><option value="views">Visualizzazioni</option><option value="likes">Like</option><option value="comments">Commenti</option></select></h2><div class="box"><canvas id="cYtGain"></canvas><div class="note" id="nYtGain"></div></div></section>
+      <section><h2>Short e video lunghi a confronto</h2><div class="box"><canvas id="cYtKind"></canvas><div class="note" id="nYtKind"></div></div></section>
+      <section><h2>Video pubblicati per settimana</h2><div class="box"><canvas id="cYtWeek"></canvas><div class="note" id="nYtWeek"></div></div></section>
+    </div>
+    <section><h2>Orari migliori <span class="muted">visualizzazioni medie per video, ora italiana, su tutti i video</span></h2><div class="scroll" id="ytHeat"></div></section>
+    <section><h2>Video del periodo <input id="ytQ" type="search" placeholder="Cerca nel titolo" aria-label="Cerca"><select id="ytType" aria-label="Tipo"><option value="">Short e video</option><option value="short">Solo Short</option><option value="video">Solo video lunghi</option></select><button data-csv="yt">Esporta CSV</button></h2>
+      <div class="scroll"><table id="ytTbl"></table></div><button class="more" data-more="yt" hidden></button></section>
+  </div>
+</main>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+const ENC = {"s": "p+2kXyP6xGcVVdLqMMwbPg==", "i": "VKDEBTl6HiwSkLGl", "n": 300000, "c": "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"}, PLAIN = null, PW_KEY = "pw:aiofmcosta";
+const $ = id => document.getElementById(id);
+const TZ = "Europe/Rome";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const isNum = v => typeof v === "number" && isFinite(v);
+const nf = v => isNum(v) ? Math.round(v).toLocaleString("it-IT") : "–";
+const CF = new Intl.NumberFormat("it-IT", {notation: "compact", maximumFractionDigits: 1});
+const cn = v => isNum(v) ? CF.format(v) : "–";
+const pc = v => isNum(v) ? (v * 100).toLocaleString("it-IT", {maximumFractionDigits: 1}) + "%" : "–";
+const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v));
+const DAYF = new Intl.DateTimeFormat("sv-SE", {timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit"});
+const romeDay = d => DAYF.format(d);
+const DTF = new Intl.DateTimeFormat("it-IT", {timeZone: TZ, day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit"});
+const fmtTs = s => s ? DTF.format(new Date(s)) : "–";
+const dd = s => s.slice(8, 10) + "/" + s.slice(5, 7);
+const WDF = new Intl.DateTimeFormat("en-GB", {timeZone: TZ, weekday: "short", hour: "2-digit", hourCycle: "h23"});
+const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], WD_IT = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+function wdHour(d) { const p = {}; WDF.formatToParts(d).forEach(x => p[x.type] = x.value); return [WD.indexOf(p.weekday), parseInt(p.hour, 10) % 24]; }
+const avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
+const sum = a => a.reduce((s, v) => s + (isNum(v) ? v : 0), 0);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const dur = s => isNum(s) ? (s >= 3600 ? `${Math.floor(s / 3600)}:${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}` : Math.floor(s / 60)) + ":" + String(s % 60).padStart(2, "0") : "–";
+
+const PL = {ig: "Instagram", tt: "TikTok", yt: "YouTube"}, FOL = {ig: "follower", tt: "follower", yt: "iscritti"};
+const pcol = p => css("--" + p);
+const IGL = {reach: "Copertura (reach)", views: "Visualizzazioni", accounts_engaged: "Account coinvolti", total_interactions: "Interazioni totali", likes: "Like", comments: "Commenti", shares: "Condivisioni", saves: "Salvataggi", reposts: "Repost", replies: "Risposte alle storie", profile_links_taps: "Tap sui link del profilo", follows_and_unfollows: "Follow + unfollow (totale)"};
+const igKind = p => p.pt === "REELS" ? "Reel" : p.mt === "CAROUSEL_ALBUM" ? "Carosello" : p.mt === "VIDEO" ? "Video" : "Foto";
+const ytKind = v => v.kind === "short" ? "Short" : v.kind === "live" ? "Live" : "Video";
+
+let D = null, PW = null, KEY = null, KEY_ID = "", online = null, wired = false, TAB = "ov";
+const charts = {}, showAll = {ig: false, tt: false, yt: false}, sortS = {ig: ["date", -1], tt: ["date", -1], yt: ["date", -1], ov: ["views", -1]};
+
+async function decryptBlob(blob) {
+  const id = blob.s + ":" + (blob.n || 300000);
+  if (!KEY || KEY_ID !== id) {
+    const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(PW), "PBKDF2", false, ["deriveKey"]);
+    KEY = await crypto.subtle.deriveKey({name: "PBKDF2", salt: b64(blob.s), iterations: blob.n || 300000, hash: "SHA-256"}, km, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
+    KEY_ID = id;
+  }
+  const buf = await crypto.subtle.decrypt({name: "AES-GCM", iv: b64(blob.i)}, KEY, b64(blob.c));
+  return JSON.parse(new TextDecoder().decode(buf));
+}
+
+function cutoff() { const n = +$("range").value; return n ? romeDay(new Date(Date.now() - (n - 1) * 864e5)) : ""; }
+const inR = (d, c) => !c || d >= c;
+const dayOf = s => s ? romeDay(new Date(s)) : "";
+const rangeText = () => { const r = $("range"); return r.options[r.selectedIndex].text.toLowerCase(); };
+
+function draw(id, type, labels, datasets, extra = {}) {
+  if (charts[id]) charts[id].destroy();
+  const base = {responsive: true, maintainAspectRatio: false, animation: false, spanGaps: true, interaction: {mode: "index", intersect: false}, plugins: {legend: {display: datasets.length > 1}}};
+  charts[id] = new Chart($(id), {type, data: {labels, datasets}, options: Object.assign(base, extra)});
+}
+const ds = (label, color, data, x = {}) => Object.assign({label, data, borderColor: color, backgroundColor: color, tension: .25, pointRadius: data.length > 45 ? 0 : 2, borderWidth: 2}, x);
+
+// ------------------------------------------------------------------ dati normalizzati per piattaforma
+// follower per giorno: {giorno: numero}
+function folSeries(p) {
+  const A = D[p]; if (!A) return {};
+  const out = {}; Object.entries(A.profile || {}).forEach(([d, v]) => { if (v && isNum(v[0])) out[d] = v[0]; }); return out;
+}
+// visualizzazioni per giorno
+function viewSeries(p) {
+  const A = D[p]; if (!A) return {};
+  if (p === "ig") return (A.insights || {}).views || {};
+  return (A.gain || {}).views || {};
+}
+// contenuti in formato comune
+function items(p) {
+  const A = D[p]; if (!A) return [];
+  if (p === "ig") return (A.posts || []).map(x => ({p, id: x.id, date: x.date, title: x.cap, thumb: x.thumb, link: x.link, kind: igKind(x),
+    views: isNum(x.views) ? x.views : x.reach, reach: x.reach, likes: x.likes, comments: x.comments, shares: x.shares, saved: x.saved, avgw: x.avgw,
+    eng: x.reach ? ((x.likes || 0) + (x.comments || 0) + (x.saved || 0) + (x.shares || 0)) / x.reach : null}));
+  if (p === "tt") return (A.videos || []).map(x => ({p, id: x.id, date: x.date, title: x.title, thumb: x.cover, link: x.link, kind: "Video",
+    views: x.views, likes: x.likes, comments: x.comments, shares: x.shares, dur: x.dur, v1: x.v1, eng: x.views ? ((x.likes || 0) + (x.comments || 0) + (x.shares || 0)) / x.views : null}));
+  return (A.videos || []).map(x => ({p, id: x.id, date: x.date, title: x.title, thumb: x.thumb, link: x.link, kind: ytKind(x), rawKind: x.kind,
+    views: x.views, likes: x.likes, comments: x.comments, dur: x.dur, v1: x.v1, eng: x.views ? ((x.likes || 0) + (x.comments || 0)) / x.views : null}));
+}
+function stats(p, c) {
+  const F = folSeries(p), days = Object.keys(F).sort();
+  const last = days.length ? F[days.at(-1)] : null, before = c ? days.filter(d => d < c) : [];
+  const ref = before.length ? F[before.at(-1)] : days.length ? F[days[0]] : null;
+  const V = viewSeries(p), its = items(p).filter(x => x.date && inR(dayOf(x.date), c));
+  const s = {last, ref, diff: isNum(last) && isNum(ref) ? last - ref : null, views: sum(Object.entries(V).filter(([d]) => inR(d, c)).map(([, v]) => v)),
+    posts: its.length, engs: its.map(x => x.eng).filter(isNum), today: V[romeDay(new Date())]};
+  const A = D[p];
+  if (p === "ig") {
+    const I = A.insights || {}, sm = m => sum(Object.entries(I[m] || {}).filter(([d]) => inR(d, c)).map(([, v]) => v));
+    Object.assign(s, {inter: sm("total_interactions"), reach: sm("reach"), fol: sm("follows_and_unfollows:FOLLOWER"), unf: sm("follows_and_unfollows:NON_FOLLOWER"), hasFU: !!Object.keys(I["follows_and_unfollows:FOLLOWER"] || {}).length});
+  } else {
+    const G = A.gain || {}, sm = m => sum(Object.entries(G[m] || {}).filter(([d]) => inR(d, c)).map(([, v]) => v));
+    s.inter = sm("likes") + sm("comments") + sm("shares");
+    const P = A.profile || {}, pd = Object.keys(P).sort(), at = pd.length ? P[pd.at(-1)] : null;
+    if (p === "tt") s.totLikes = at ? at[2] : null;
+    if (p === "yt") { s.totViews = at ? at[1] : null; s.shorts = its.filter(x => x.rawKind === "short").length; }
+  }
+  return s;
+}
+
+// ------------------------------------------------------------------ panoramica
+function platCard(p, c, link = true) {
+  const A = D[p];
+  if (!A) return `<div class="card ${p}"><h3><span class="pd ${p}"></span>${PL[p]}</h3><div class="big muted">–</div><div class="muted">${notConnected(p, true)}</div></div>`;
+  const s = stats(p, c), up = (s.diff || 0) >= 0, info = A.info || {};
+  const extra = p === "ig" ? `<span><b>${cn(s.reach)}</b> copertura</span><span>${s.hasFU ? `<b class="up">+${nf(s.fol)}</b> / <b class="down">−${nf(s.unf)}</b>` : "<b>–</b>"} follow/unfollow</span>`
+    : p === "tt" ? `<span><b>${cn(s.totLikes)}</b> like totali</span><span><b>${pc(avg(s.engs))}</b> engagement medio</span>`
+    : `<span><b>${cn(s.totViews)}</b> views totali canale</span><span><b>${s.shorts || 0}</b> di cui Short</span>`;
+  return `<div class="card ${p}"><h3><span class="pd ${p}"></span>${PL[p]}${info.username || A.name ? ` · ${esc(info.username || A.name)}` : ""}${link ? `<a class="go" href="#${{ig: "instagram", tt: "tiktok", yt: "youtube"}[p]}">Dettagli →</a>` : ""}</h3>
+<div class="big">${nf(s.last)}</div>
+<div class="${up ? "up" : "down"}">${isNum(s.diff) ? sgn(s.diff) : "–"} ${FOL[p]}${isNum(s.diff) && s.ref ? ` (${up ? "+" : ""}${pc(s.diff / s.ref)})` : ""}</div>
+<div class="mini"><span><b>${cn(s.views)}</b> visualizzazioni</span><span><b>${cn(s.inter)}</b> interazioni</span>
+<span><b>${s.posts}</b> ${p === "ig" ? "post" : "video"} pubblicati</span>${extra}</div>
+${isNum(s.today) ? `<div class="muted">Oggi finora: ${cn(s.today)} visualizzazioni</div>` : ""}</div>`;
+}
+function notConnected(p, short) {
+  const S = D.setup || {};
+  if (p === "ig") return S.ig ? "In attesa della prima raccolta." : (short ? "Non collegato." : `Instagram non è ancora collegato: aggiungi il token del profilo nel secret <b>${esc(S.ig_secret || "IG_CONFIG")}</b> del repository del tracker.`);
+  if (p === "tt") return short ? "Non collegato." : `TikTok non è ancora collegato: apri <a href="tiktok.html">la pagina di collegamento</a>, accedi con il profilo e segui le istruzioni.`;
+  return S.yt ? (short ? "In attesa della prima raccolta." : "In attesa della prima raccolta: controlla l'@handle in <b>YOUTUBE_CHANNELS</b> se dopo un'ora non compare nulla.")
+    : (short ? "Non collegato." : "YouTube non è ancora collegato: aggiungi la chiave API nel secret <b>YOUTUBE_API_KEY</b> del repository del tracker.");
+}
+function renderOverview(c) {
+  const P = ["ig", "tt", "yt"], on = P.filter(p => D[p]);
+  const S = Object.fromEntries(on.map(p => [p, stats(p, c)]));
+  const tot = {last: sum(on.map(p => S[p].last)), diff: sum(on.map(p => S[p].diff)), ref: sum(on.map(p => S[p].ref)), views: sum(on.map(p => S[p].views)), posts: sum(on.map(p => S[p].posts)), inter: sum(on.map(p => S[p].inter)), today: sum(on.map(p => S[p].today))};
+  const up = tot.diff >= 0;
+  $("ovKpi").innerHTML = `<div class="card"><h3>Pubblico totale · ${on.length} piattaform${on.length === 1 ? "a" : "e"}</h3><div class="big">${nf(tot.last)}</div>
+<div class="${up ? "up" : "down"}">${sgn(tot.diff)} nel periodo${tot.ref ? ` (${up ? "+" : ""}${pc(tot.diff / tot.ref)})` : ""}</div>
+<div class="mini"><span><b>${cn(tot.views)}</b> visualizzazioni</span><span><b>${cn(tot.inter)}</b> interazioni</span><span><b>${tot.posts}</b> contenuti pubblicati</span>
+${on.map(p => `<span><span class="pd ${p}"></span> <b>${isNum(S[p].views) && tot.views ? pc(S[p].views / tot.views) : "–"}</b> views da ${PL[p]}</span>`).join("")}</div>
+<div class="muted">Somma di follower Instagram, follower TikTok e iscritti YouTube (${rangeText()}).</div></div>` + P.map(p => platCard(p, c)).join("");
+
+  const days = [...new Set(on.flatMap(p => Object.keys(folSeries(p))))].filter(d => inR(d, c)).sort();
+  $("nOvFol").textContent = days.length > 1 ? "" : "Il grafico si riempie man mano che il tracker raccoglie i dati.";
+  draw("cOvFol", "line", days.map(dd), on.map(p => { const F = folSeries(p), v = days.map(d => isNum(F[d]) ? F[d] : null), b = v.find(isNum); return ds(PL[p], pcol(p), v.map(x => isNum(x) ? x - b : null)); }),
+    {plugins: {legend: {display: true}, tooltip: {callbacks: {label: x => `${x.dataset.label}: ${sgn(x.raw)} ${FOL[on[x.datasetIndex]]}`}}}});
+
+  const vd = [...new Set(on.flatMap(p => Object.keys(viewSeries(p))))].filter(d => inR(d, c)).sort();
+  $("nOvViews").textContent = vd.length ? "" : "Nessun dato nel periodo.";
+  draw("cOvViews", "bar", vd.map(dd), on.map(p => { const V = viewSeries(p); return ds(PL[p], pcol(p), vd.map(d => isNum(V[d]) ? V[d] : null), {stack: "v"}); }),
+    {plugins: {legend: {display: true}}, scales: {x: {stacked: true}, y: {stacked: true}}});
+
+  const top = on.flatMap(p => items(p)).filter(x => x.date && inR(dayOf(x.date), c) && isNum(x.views)).sort((a, b) => b.views - a.views).slice(0, 15);
+  $("ovTop").innerHTML = `<thead><tr><th></th><th></th><th>Piattaforma</th><th>Data</th><th>Tipo</th><th>Titolo</th><th>Views</th><th>Like</th><th>Comm.</th><th></th></tr></thead><tbody>` +
+    (top.length ? top.map((x, i) => `<tr><td class="muted">${i + 1}</td><td>${thumb(x)}</td><td><span class="tag"><span class="pd ${x.p}"></span>${PL[x.p]}</span></td><td>${fmtTs(x.date)}</td><td>${esc(x.kind)}</td><td class="cap">${capCell(x.title)}</td><td><b>${nf(x.views)}</b></td><td>${nf(x.likes)}</td><td>${nf(x.comments)}</td><td>${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">Apri</a>` : ""}</td></tr>`).join("")
+      : `<tr><td colspan="10" class="muted">Nessun contenuto pubblicato nel periodo.</td></tr>`) + "</tbody>";
+
+  const H = P.map(p => { const A = D[p], h = A ? A.health || {} : null;
+    const exp = p === "ig" ? h && h.token_exp : p === "tt" ? h && h.refresh_expires : null;
+    const st = !A ? `<span class="tag">Non collegato</span>` : h.ok ? `<span class="tag ok">OK</span>` : h.last ? `<span class="tag ko">Errore</span>` : `<span class="tag">In attesa</span>`;
+    return `<tr><td><span class="pd ${p}"></span> ${PL[p]}</td><td>${st}</td><td>${A ? fmtTs(h.last) : "–"}</td><td>${A ? fmtTs(h.last_ok) : "–"}</td><td>${exp ? fmtTs(exp) : "–"}</td><td class="cap">${A ? esc(h.msg || "") : notConnected(p)}</td></tr>`; });
+  $("ovHealth").innerHTML = `<thead><tr><th>Piattaforma</th><th>Stato</th><th>Ultimo controllo</th><th>Ultimo riuscito</th><th>Scadenza accesso</th><th>Dettagli</th></tr></thead><tbody>${H.join("")}</tbody>`;
+  $("ovNote").innerHTML = "YouTube mostra pubblicamente gli iscritti arrotondati (es. 12.300): la crescita degli iscritti avanza a scatti. Le visualizzazioni giornaliere di TikTok e YouTube sono la crescita delle views di tutti i video tra un giorno e l'altro.";
+}
+
+// ------------------------------------------------------------------ elementi comuni
+const thumb = x => x.thumb ? `<img class="th${x.p === "yt" ? " wide" : ""}" src="${esc(x.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "";
+const capCell = c => { c = c || ""; return `<span title="${esc(c)}">${esc(c.slice(0, 80))}${c.length > 80 ? "…" : ""}</span>`; };
+function folChart(p, id, c) {
+  const F = folSeries(p), days = Object.keys(F).filter(d => inR(d, c)).sort();
+  $("n" + id.slice(1)).textContent = days.length > 1 ? "" : "Il grafico si riempie man mano che il tracker raccoglie i dati.";
+  draw(id, "line", days.map(dd), [ds(FOL[p][0].toUpperCase() + FOL[p].slice(1), pcol(p), days.map(d => F[d]))]);
+}
+function newPerDay(p, id, c) {
+  const F = folSeries(p), all = Object.keys(F).sort(), days = all.filter(d => inR(d, c)).filter(d => all.indexOf(d) > 0);
+  $("n" + id.slice(1)).textContent = days.length ? "" : "Serve almeno un giorno di dati in più.";
+  draw(id, "bar", days.map(dd), [{label: "Variazione follower", data: days.map(d => F[d] - F[all[all.indexOf(d) - 1]]), backgroundColor: days.map(d => F[d] - F[all[all.indexOf(d) - 1]] >= 0 ? css("--up") : css("--down"))}]);
+}
+function gainChart(p, id, metric, c) {
+  const G = ((D[p].gain || {})[metric]) || {}, days = Object.keys(G).filter(d => inR(d, c)).sort();
+  $("n" + id.slice(1)).textContent = days.length ? "" : "Serve almeno un giorno di dati in più per calcolare la crescita.";
+  draw(id, "bar", days.map(dd), [ds($(p + "Met").selectedOptions[0].text, pcol(p), days.map(d => G[d]))]);
+}
+function weekChart(p, id, c) {
+  const W = {}; items(p).forEach(x => { if (!x.date || !inR(dayOf(x.date), c)) return; const d = new Date(dayOf(x.date) + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7); const k = d.toISOString().slice(0, 10); W[k] = (W[k] || 0) + 1; });
+  const ks = Object.keys(W).sort();
+  $("n" + id.slice(1)).textContent = ks.length ? "" : "Nessun video nel periodo.";
+  draw(id, "bar", ks.map(k => "sett. " + dd(k)), [ds("Video pubblicati", pcol(p), ks.map(k => W[k]))]);
+}
+function heatTable(list, target, unit) {
+  const G = WD.map(() => Array.from({length: 8}, () => [0, 0]));
+  list.forEach(x => { if (!x.date || !isNum(x.views)) return; const [w, h] = wdHour(new Date(x.date)); if (w < 0) return; const g = G[w][Math.floor(h / 3)]; g[0] += x.views; g[1]++; });
+  const A = G.map(r => r.map(([s, k]) => k ? s / k : null)), vals = A.flat().filter(isNum), max = vals.length ? Math.max(...vals) : 0;
+  let best = null; A.forEach((r, w) => r.forEach((v, b) => { if (isNum(v) && (!best || v > best.v)) best = {v, w, b}; }));
+  const slot = b => `${String(b * 3).padStart(2, "0")}–${String(b * 3 + 3).padStart(2, "0")}`;
+  if (!vals.length) { $(target).innerHTML = '<div class="muted">Servono contenuti con visualizzazioni per calcolare gli orari migliori.</div>'; return; }
+  $(target).innerHTML = `<table class="heat"><tr><th></th>${A[0].map((_, b) => `<th>${slot(b)}</th>`).join("")}</tr>` + A.map((r, w) => `<tr><th>${WD_IT[w]}</th>${r.map((v, b) => { const a = isNum(v) && max ? .15 + .85 * v / max : 0, k = G[w][b][1]; return `<td style="${a ? `background:rgba(42,111,219,${a.toFixed(2)});color:${a > .55 ? "#fff" : "inherit"}` : ""}" title="${k} ${unit}">${isNum(v) ? cn(Math.round(v)) : ""}${k ? `<small>${k} ${unit}</small>` : ""}</td>`; }).join("")}</tr>`).join("") + "</table>" +
+    (best ? `<div class="muted" style="margin-top:6px">Fascia migliore finora: <b>${WD_IT[best.w]} ${slot(best.b)}</b> con ${cn(Math.round(best.v))} visualizzazioni medie.</div>` : "");
+}
+
+// tabelle dei contenuti
+const COLS = {
+  ig: [["thumb", ""], ["date", "Data"], ["kind", "Tipo"], ["title", "Didascalia"], ["views", "Views"], ["reach", "Reach"], ["likes", "Like"], ["comments", "Comm."], ["saved", "Salv."], ["shares", "Cond."], ["eng", "Eng."], ["avgw", "Watch medio"], ["link", ""]],
+  tt: [["thumb", ""], ["date", "Data"], ["title", "Titolo"], ["dur", "Durata"], ["views", "Views"], ["v1", "Views 1° giorno"], ["likes", "Like"], ["comments", "Comm."], ["shares", "Cond."], ["eng", "Eng."], ["link", ""]],
+  yt: [["thumb", ""], ["date", "Data"], ["kind", "Tipo"], ["title", "Titolo"], ["dur", "Durata"], ["views", "Views"], ["v1", "Views 1° giorno"], ["likes", "Like"], ["comments", "Comm."], ["eng", "Eng."], ["link", ""]],
+};
+function rows(p) {
+  const c = cutoff(), q = ($(p + "Q").value || "").trim().toLowerCase(), t = $(p + "Type") ? $(p + "Type").value : "";
+  let L = items(p).filter(x => x.date && inR(dayOf(x.date), c));
+  if (t) L = L.filter(x => p === "yt" ? x.rawKind === t : x.kind === t);
+  if (q) L = L.filter(x => (x.title || "").toLowerCase().includes(q));
+  const [k, dir] = sortS[p];
+  return L.sort((a, b) => { const x = a[k], y = b[k]; if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
+}
+function cellOf(x, k) {
+  switch (k) {
+    case "thumb": return thumb(x);
+    case "kind": return esc(x.kind);
+    case "date": return fmtTs(x.date);
+    case "title": return capCell(x.title);
+    case "eng": return pc(x.eng);
+    case "dur": return dur(x.dur);
+    case "avgw": return isNum(x.avgw) ? (x.avgw / 1000).toLocaleString("it-IT", {maximumFractionDigits: 1}) + " s" : "–";
+    case "link": return x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">Apri</a>` : "";
+    default: return nf(x[k]);
+  }
+}
+function renderTable(p) {
+  const L = rows(p), cols = COLS[p], [sk, sd] = sortS[p], shown = showAll[p] ? L : L.slice(0, 20);
+  $(p + "Tbl").innerHTML = `<thead><tr>${cols.map(([k, l]) => l ? `<th data-k="${k}" class="${k === sk ? "sorted" : ""}">${l}${k === sk ? (sd < 0 ? " ▾" : " ▴") : ""}</th>` : "<th></th>").join("")}</tr></thead><tbody>` +
+    (shown.length ? shown.map(x => `<tr>${cols.map(([k]) => `<td${k === "title" ? ' class="cap"' : ""}>${cellOf(x, k)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" class="muted">Nessun contenuto nel periodo selezionato.</td></tr>`) + "</tbody>";
+  const m = document.querySelector(`[data-more="${p}"]`);
+  m.hidden = L.length <= 20; m.textContent = showAll[p] ? "Mostra meno" : `Mostra tutti (${L.length})`;
+}
+function exportCsv(p) {
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, cols = COLS[p].filter(([k, l]) => l || k === "link");
+  const val = (x, k) => k === "date" ? fmtTs(x.date) : k === "eng" ? (isNum(x.eng) ? (x.eng * 100).toFixed(2).replace(".", ",") : "") : k === "dur" ? dur(x.dur) : k === "avgw" ? (isNum(x.avgw) ? (x.avgw / 1000).toFixed(1).replace(".", ",") : "") : x[k];
+  const lines = [cols.map(([k, l]) => q(l || "Link")).join(";")].concat(rows(p).map(x => cols.map(([k]) => q(val(x, k))).join(";")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], {type: "text/csv;charset=utf-8"}));
+  a.download = `${D.creator}-${PL[p].toLowerCase()}-${romeDay(new Date())}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ------------------------------------------------------------------ pagine delle piattaforme
+function platHead(p) {
+  const on = !!D[p];
+  $(p + "Msg").innerHTML = on ? healthAlert(p) : `<div class="alert">${notConnected(p)}</div>`;
+  $(p + "Body").hidden = !on;
+  return on;
+}
+function healthAlert(p) {
+  const h = D[p].health || {};
+  return h.last && !h.ok ? `<div class="alert err"><b>Ultima raccolta ${PL[p]} non riuscita</b> (${fmtTs(h.last)}): ${esc(h.msg || "")}</div>` : "";
+}
+function renderIg(c) {
+  if (!platHead("ig")) return;
+  const A = D.ig, I = A.insights || {};
+  $("igKpi").innerHTML = platCard("ig", c, false);
+  folChart("ig", "cIgFol", c);
+  const ms = Object.keys(I).filter(m => !m.includes(":")).sort((a, b) => (IGL[a] || a).localeCompare(IGL[b] || b)), cm = $("igMet").value || "views";
+  $("igMet").innerHTML = ms.map(m => `<option value="${esc(m)}">${esc(IGL[m] || m)}</option>`).join("");
+  if (ms.includes(cm)) $("igMet").value = cm;
+  const m = $("igMet").value, S = I[m] || {}, idays = Object.keys(S).filter(d => inR(d, c)).sort();
+  $("nIgIns").textContent = idays.length ? "" : "Nessun dato nel periodo.";
+  draw("cIgIns", "line", idays.map(dd), [ds(IGL[m] || m, pcol("ig"), idays.map(d => S[d]))]);
+  const F = I["follows_and_unfollows:FOLLOWER"] || {}, U = I["follows_and_unfollows:NON_FOLLOWER"] || {};
+  const fu = [...new Set([...Object.keys(F), ...Object.keys(U)])].filter(d => inR(d, c)).sort();
+  $("nIgFU").textContent = fu.length ? "" : "Instagram fornisce questo dato solo ai profili con almeno 100 follower.";
+  draw("cIgFU", "bar", fu.map(dd), [{label: "Nuovi follower", data: fu.map(d => F[d] || 0), backgroundColor: css("--up")}, {label: "Unfollow", data: fu.map(d => -(U[d] || 0)), backgroundColor: css("--down")}], {scales: {x: {stacked: true}, y: {stacked: true}}});
+  const P = items("ig").filter(x => x.date && inR(dayOf(x.date), c)), kinds = [...new Set(P.map(x => x.kind))].sort();
+  const mean = (k, f) => avg(P.filter(x => x.kind === k).map(f).filter(isNum));
+  $("nIgType").textContent = P.length ? "" : "Nessun post nel periodo selezionato.";
+  draw("cIgType", "bar", kinds.map(k => `${k} (${P.filter(x => x.kind === k).length})`), [ds("Visualizzazioni medie", pcol("ig"), kinds.map(k => mean(k, x => x.views))), ds("Copertura media", css("--accent"), kinds.map(k => mean(k, x => x.reach))), ds("Interazioni medie", css("--warn"), kinds.map(k => mean(k, x => (x.likes || 0) + (x.comments || 0) + (x.saved || 0) + (x.shares || 0))))], {plugins: {legend: {display: true}}});
+  heatTable(items("ig"), "igHeat", "post");
+  const ct = $("igType").value, all = [...new Set(P.map(x => x.kind))].sort();
+  $("igType").innerHTML = '<option value="">Tutti i tipi</option>' + all.map(k => `<option>${k}</option>`).join("");
+  $("igType").value = all.includes(ct) ? ct : "";
+  renderTable("ig");
+  const st = (A.stories || []).filter(s => Date.now() - new Date(s.date) <= 7 * 864e5).sort((a, b) => b.date.localeCompare(a.date));
+  $("igSto").innerHTML = `<thead><tr><th>Data</th><th>Views</th><th>Reach</th><th>Risposte</th><th>Avanti</th><th>Indietro</th><th>Uscite</th><th>Swipe</th><th></th></tr></thead><tbody>` +
+    (st.length ? st.map(s => `<tr><td>${fmtTs(s.date)}</td><td>${nf(s.views)}</td><td>${nf(s.reach)}</td><td>${nf(s.replies)}</td><td>${nf(s.tf)}</td><td>${nf(s.tb)}</td><td>${nf(s.te)}</td><td>${nf(s.sf)}</td><td>${s.link ? `<a href="${esc(s.link)}" target="_blank" rel="noopener">Apri</a>` : ""}</td></tr>`).join("")
+      : '<tr><td colspan="9" class="muted">Nessuna storia negli ultimi 7 giorni.</td></tr>') + "</tbody>";
+}
+function renderTt(c) {
+  if (!platHead("tt")) return;
+  $("ttKpi").innerHTML = platCard("tt", c, false);
+  folChart("tt", "cTtFol", c); gainChart("tt", "cTtGain", $("ttMet").value, c); newPerDay("tt", "cTtNew", c); weekChart("tt", "cTtWeek", c);
+  heatTable(items("tt"), "ttHeat", "video"); renderTable("tt");
+}
+function renderYt(c) {
+  if (!platHead("yt")) return;
+  $("ytKpi").innerHTML = platCard("yt", c, false);
+  folChart("yt", "cYtFol", c); gainChart("yt", "cYtGain", $("ytMet").value, c); weekChart("yt", "cYtWeek", c);
+  const V = items("yt").filter(x => x.date && inR(dayOf(x.date), c)), K = [["short", "Short"], ["video", "Video lunghi"]].filter(([k]) => V.some(x => x.rawKind === k));
+  const mean = (k, f) => avg(V.filter(x => x.rawKind === k).map(f).filter(isNum));
+  $("nYtKind").textContent = K.length ? "" : "Nessun video nel periodo selezionato.";
+  draw("cYtKind", "bar", K.map(([k, l]) => `${l} (${V.filter(x => x.rawKind === k).length})`), [ds("Views medie", pcol("yt"), K.map(([k]) => mean(k, x => x.views))), ds("Like medi", css("--accent"), K.map(([k]) => mean(k, x => x.likes))), ds("Commenti medi", css("--warn"), K.map(([k]) => mean(k, x => x.comments)))], {plugins: {legend: {display: true}}});
+  heatTable(items("yt"), "ytHeat", "video"); renderTable("yt");
+}
+
+// ------------------------------------------------------------------ navigazione, aggiornamento, accesso
+const TABS = {"": "ov", "#instagram": "ig", "#tiktok": "tt", "#youtube": "yt"};
+function route() {
+  TAB = TABS[location.hash] || "ov";
+  document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.t === TAB));
+  ["ov", "ig", "tt", "yt"].forEach(t => $(t).hidden = t !== TAB);
+  const c = cutoff();
+  ({ov: renderOverview, ig: renderIg, tt: renderTt, yt: renderYt})[TAB](c);
+}
+function render() {
+  if (!D) return;
+  $("tabs").hidden = false;
+  const pic = ["ig", "tt", "yt"].map(p => D[p] && (D[p].info || {}).pic).find(Boolean);
+  if (pic) { $("pic").src = pic; $("pic").hidden = false; $("pic").onerror = () => $("pic").hidden = true; }
+  $("alerts").innerHTML = !D.ig && !D.tt && !D.yt ? '<div class="alert">Nessun dato ancora: il tracker non ha completato nessuna raccolta. Controlla la scheda Panoramica → Stato della raccolta.</div>' : "";
+  route(); updLabel();
+}
+function updLabel() {
+  if (!D) return;
+  const age = (Date.now() - new Date(D.generated)) / 6e4, int = D.interval || 60, next = Math.round(int + 5 - age);
+  const ago = age < 1 ? "adesso" : age < 60 ? `${Math.round(age)} min fa` : `${Math.floor(age / 60)} h fa`;
+  $("upd").textContent = `Dati del ${fmtTs(D.generated)} · ${ago}` + (online === false ? " · sei offline o la pagina non è raggiungibile" : next > 0 ? ` · prossimo aggiornamento tra ~${next} min` : " · nuovo aggiornamento in arrivo");
+  $("live").className = "live muted " + (online === false ? "off" : age < 2 * int ? "on" : "late");
+}
+async function poll() {
+  if (location.protocol === "file:") return false;
+  let changed = false;
+  try {
+    const r = await fetch("data.json?t=" + Date.now(), {cache: "no-store"});
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), nd = j && j.c ? await decryptBlob(j) : j;
+    online = true;
+    if (nd && nd.generated && (!D || nd.generated > D.generated)) { D = nd; changed = true; render(); toast("Dati aggiornati"); }
+  } catch (e) { online = false; }
+  updLabel();
+  return changed;
+}
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove("show"), 2500); }
+function wire() {
+  if (wired) return; wired = true;
+  let pr = {}; try { pr = JSON.parse(localStorage.getItem("dash:" + PW_KEY) || "{}"); } catch (e) {}
+  if (pr.range && [...$("range").options].some(o => o.value === pr.range)) $("range").value = pr.range;
+  $("range").onchange = () => { try { localStorage.setItem("dash:" + PW_KEY, JSON.stringify({range: $("range").value})); } catch (e) {} route(); };
+  window.addEventListener("hashchange", route);
+  ["igMet", "igType", "ttMet", "ytMet", "ytType"].forEach(id => $(id).onchange = route);
+  ["ig", "tt", "yt"].forEach(p => {
+    $(p + "Q").oninput = () => renderTable(p);
+    $(p + "Tbl").onclick = e => { const th = e.target.closest("th[data-k]"); if (!th) return; const k = th.dataset.k, s = sortS[p]; if (k === s[0]) s[1] = -s[1]; else { s[0] = k; s[1] = ["title", "kind"].includes(k) ? 1 : -1; } renderTable(p); };
+  });
+  document.querySelectorAll("[data-more]").forEach(b => b.onclick = () => { const p = b.dataset.more; showAll[p] = !showAll[p]; renderTable(p); });
+  document.querySelectorAll("[data-csv]").forEach(b => b.onclick = () => exportCsv(b.dataset.csv));
+  $("reload").onclick = async () => { $("reload").disabled = true; const ch = await poll(); $("reload").disabled = false; if (!ch) toast(online === false ? "Impossibile scaricare i dati" : "Nessun dato nuovo per ora"); };
+  $("logout").onclick = () => { try { localStorage.removeItem(PW_KEY); } catch (e) {} location.reload(); };
+  if (D.actions) { $("force").href = D.actions; $("force").hidden = false; }
+}
+function start() {
+  wire(); render(); poll();
+  setInterval(poll, 120000); setInterval(updLabel, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+}
+async function unlock(pw) {
+  PW = pw; KEY = null;
+  try { D = await decryptBlob(ENC); } catch (e) { PW = null; return false; }
+  try { localStorage.setItem(PW_KEY, pw); } catch (e) {}
+  return true;
+}
+async function boot() {
+  if (typeof Chart === "undefined") { $("alerts").innerHTML = '<div class="alert">Impossibile caricare la libreria dei grafici: controlla la connessione e ricarica.</div>'; return; }
+  Chart.defaults.color = css("--muted"); Chart.defaults.borderColor = css("--line");
+  Chart.defaults.font.family = 'system-ui, -apple-system, "Segoe UI", sans-serif';
+  if (!ENC) { D = PLAIN; return start(); }
+  $("logout").hidden = false;
+  let saved = null; try { saved = localStorage.getItem(PW_KEY); } catch (e) {}
+  if (saved && await unlock(saved)) return start();
+  $("gate").hidden = false; $("upd").textContent = "Inserisci la password";
+  const go = async () => { $("gmsg").textContent = "Verifica…"; if (await unlock($("pw").value)) { $("gate").hidden = true; start(); } else $("gmsg").textContent = "Password errata."; };
+  $("go").onclick = go; $("pw").onkeydown = e => { if (e.key === "Enter") go(); };
+  $("pw").focus();
+}
+boot();
+</script></body></html>
